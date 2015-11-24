@@ -1,4 +1,4 @@
-package ro.dreaku.filesystem.filesystem;
+package ro.dreaku.filesystem;
 
 import ro.dreaku.filesystem.disk.DiskInterface;
 import ro.dreaku.filesystem.exception.DiskFullException;
@@ -6,6 +6,7 @@ import ro.dreaku.filesystem.exception.FileAlreadyExistsException;
 import ro.dreaku.filesystem.exception.FileNotFoundException;
 import ro.dreaku.filesystem.exception.FileNotOpenException;
 import ro.dreaku.filesystem.exception.TooManyOpenFilesException;
+import ro.dreaku.filesystem.file.FileInterface;
 
 public interface FileSystem
 {
@@ -25,7 +26,7 @@ public interface FileSystem
      * @lanseaza exceptia TooManyOpenFilesException daca a fost depasit numarul maxim admis de
      *           fisiere deschise.
      */
-    public FileSystemInterface create(String name)
+    public FileInterface create(String name)
             throws FileAlreadyExistsException, TooManyOpenFilesException, DiskFullException;
 
     /**
@@ -52,7 +53,7 @@ public interface FileSystem
      * @lanseaza TooManyOpenFilesException cand este depasit numarul maxim admis de fisiere simultan
      *           deschise (MAX_OPEN).
      */
-    public FileSystemInterface open(String name, int mode)
+    public FileInterface open(String name, int mode)
             throws FileNotFoundException, TooManyOpenFilesException, DiskFullException;
 
     /**
@@ -63,7 +64,7 @@ public interface FileSystem
      * @lanseaza exceptia FileNotOpenException la incercarea de a inchide un fisier ce nu a fost
      *           deschis
      */
-    public void close(FileSystemInterface file) throws FileNotOpenException;
+    public void close(FileInterface file) throws FileNotOpenException;
 
     /**
      * Sterge datele discului. Creaza un nou sistem de fisiere pe disc.

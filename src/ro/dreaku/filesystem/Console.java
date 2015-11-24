@@ -1,9 +1,7 @@
 package ro.dreaku.filesystem;
 
-import java.awt.Event;
 import java.awt.Frame;
 import java.awt.Point;
-import java.awt.TextArea;
 
 import ro.dreaku.filesystem.disk.DiskInterface;
 import ro.dreaku.filesystem.exception.BadBlockException;
@@ -12,8 +10,7 @@ import ro.dreaku.filesystem.exception.FileAlreadyExistsException;
 import ro.dreaku.filesystem.exception.FileNotFoundException;
 import ro.dreaku.filesystem.exception.FileNotOpenException;
 import ro.dreaku.filesystem.exception.TooManyOpenFilesException;
-import ro.dreaku.filesystem.filesystem.FileSystemInterface;
-import ro.dreaku.filesystem.filesystem.FileSystem;
+import ro.dreaku.filesystem.file.FileInterface;
 
 public class Console extends Frame implements FileSystem
 {
@@ -553,7 +550,7 @@ public class Console extends Frame implements FileSystem
 
     // descrisa in interfata FileSystem
     @Override
-    public FileSystemInterface create(String name)
+    public FileInterface create(String name)
             throws FileAlreadyExistsException, TooManyOpenFilesException, DiskFullException
     {
         return null;
@@ -561,7 +558,7 @@ public class Console extends Frame implements FileSystem
 
     // descrisa in interfata FileSystem
     @Override
-    public FileSystemInterface open(String name, int mode)
+    public FileInterface open(String name, int mode)
             throws FileNotFoundException, TooManyOpenFilesException, DiskFullException
     {
         return null;
@@ -569,7 +566,7 @@ public class Console extends Frame implements FileSystem
 
     // descrisa in interfata FileSystem
     @Override
-    public void close(FileSystemInterface file) throws FileNotOpenException
+    public void close(FileInterface file) throws FileNotOpenException
     {
     }
 
@@ -729,120 +726,5 @@ public class Console extends Frame implements FileSystem
     String write_with_commas(int i)
     {
         return null;
-    }
-
-}
-
-// ==============================================================================//
-
-class file implements FileSystemInterface
-{
-    Console console;
-    Point entry;
-    int mode;
-    int position;
-
-    file(Console console, Point entry, int mode)
-    {
-        this.console = console;
-        this.entry = entry;
-        this.mode = mode;
-    }
-
-    // vezi fileInterface
-    @Override
-    public int read(byte buffer[], int readCount) throws ro.dreaku.filesystem.exception.IllegalAccessException
-    {
-        return readCount;
-    }
-
-    // vezi fileInterface
-    @Override
-    public int write(byte buffer[], int writeCount)
-            throws ro.dreaku.filesystem.exception.IllegalAccessException, DiskFullException
-    {
-        return writeCount;
-    }
-
-    // vezi fileInterface
-    @Override
-    public void seek(int position)
-    {
-    }
-
-    // vezi fileInterface
-    @Override
-    public int getSize()
-    {
-        return mode;
-    }
-
-    // vezi fileInterface
-    @Override
-    public int getMode()
-    {
-        return mode;
-    }
-
-}
-
-// ==============================================================================//
-// fereastra de editare a fisierelor
-
-class Edit extends Frame
-{
-
-    private static final long serialVersionUID = 1L;
-
-    TextArea text;
-    Console console;
-    Point fileEntry;
-    file file;
-    String name;
-    int index;
-    int mode;
-
-    // constructor
-    Edit(Console console, int index, int mode)
-    {
-    }
-
-    // adauga bara cu meniuri (aceasta va contine meniul File cu submeniurile
-    // Save si Exit pt modul edit si numai
-    // meniul Exit, pt modul View)
-    void addMenuBar()
-    {
-    }
-
-    @Override
-    public boolean handleEvent(Event e)
-    {
-        return false;
-    }
-
-    // scrie continutul fisierului in TextArea
-    void load()
-    {
-    }
-
-    // salveaza modificarile facute (sterge intreg continutul, seteaza
-    // position=0, scrie noul continut)
-    void save()
-    {
-    }
-
-    // folosita in save; scrie fisierul prin intermediul lui file
-    void write()
-    {
-    }
-
-    // folosita in save; sterge continutul fisierului inaintea salvarii
-    void delete(Point EOF)
-    {
-    }
-
-    // inchide fereastra editorului (fara a se iesi din program)
-    void close()
-    {
     }
 }

@@ -1,9 +1,9 @@
-package ro.dreaku.filesystem.filesystem;
+package ro.dreaku.filesystem.file;
 
 import ro.dreaku.filesystem.exception.DiskFullException;
 import ro.dreaku.filesystem.exception.IllegalAccessException;
 
-public interface FileSystemInterface
+public interface FileInterface
 {
     /** Fisier deschis in modul READ-ONLY */
     public static final int READ_ONLY = 0;
