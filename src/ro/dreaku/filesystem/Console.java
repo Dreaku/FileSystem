@@ -1,7 +1,12 @@
 package ro.dreaku.filesystem;
 
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.Frame;
 import java.awt.Point;
+import java.awt.TextArea;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import ro.dreaku.filesystem.disk.DiskInterface;
 import ro.dreaku.filesystem.exception.BadBlockException;
@@ -16,23 +21,59 @@ public class Console extends Frame implements FileSystem
 {
     private static final long serialVersionUID = 1L;
 
+    private static final String WINDOW_TITLE = "FileSystem";
+    private static final String CONSOLE_STRING = ">";
+    private static final String COPYRIGHT_STRING = "Copyright \u00a9 2015 Dreaku.\nAll rights reserved.";
+
     static final int BLOCK_SIZE = 1024; // [bytes]
     static final int ROOT_ENTRY_LENGTH = 32; // [bytes]
     static final byte DESCRIPTOR = (byte) 0; // usual: F6 HEX
 
+    private TextArea textArea;
+
     public static void main(String[] args)
     {
+        Console c = new Console();
+        c.copyright();
+        c.printConsole();
+
     }
 
-    // mesajele afisate la lansarea in executie a simulatorului
-    void copyright()
-    {
-    }
-
-    // constructor; trebuie sa permita lansarea comenzilor new (pentru un nou
-    // sistem) sau load (pentru incarcarea unui sistem existent pe HDD)
     Console()
     {
+        super(WINDOW_TITLE);
+        setSize(500, 500);
+        setLocationRelativeTo(null);
+
+        textArea = new TextArea();
+        textArea.setBackground(Color.BLACK);
+        textArea.setForeground(Color.GREEN);
+        textArea.setFont(new Font("Courier New", Font.BOLD, 12));
+        add(textArea);
+
+        addWindowListener(new WindowAdapter()
+        {
+            @Override
+            public void windowClosing(WindowEvent windowEvent)
+            {
+                System.exit(0);
+            }
+        });
+
+        setVisible(true);
+    }
+
+    private JSch asd;
+
+    // Message shown after launching the simulator
+    void copyright()
+    {
+        textArea.append(COPYRIGHT_STRING + "\n\n");
+    }
+
+    void printConsole()
+    {
+        textArea.append(CONSOLE_STRING);
     }
 
     /*
