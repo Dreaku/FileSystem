@@ -63,8 +63,6 @@ public class Console extends Frame implements FileSystem
         setVisible(true);
     }
 
-    private JSch asd;
-
     // Message shown after launching the simulator
     void copyright()
     {
