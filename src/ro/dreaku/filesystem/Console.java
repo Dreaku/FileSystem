@@ -1,13 +1,21 @@
 package ro.dreaku.filesystem;
 
 import java.awt.Color;
+import java.awt.FileDialog;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.Point;
 import java.awt.TextArea;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
+import javax.swing.JFileChooser;
+
+import ro.dreaku.filesystem.disk.Disk;
 import ro.dreaku.filesystem.disk.DiskInterface;
 import ro.dreaku.filesystem.exception.BadBlockException;
 import ro.dreaku.filesystem.exception.DiskFullException;
@@ -25,15 +33,50 @@ public class Console extends Frame implements FileSystem
     private static final String CONSOLE_STRING = ">";
     private static final String COPYRIGHT_STRING = "Copyright \u00a9 2015 Dreaku.\nAll rights reserved.";
 
-    static final int BLOCK_SIZE = 1024; // [bytes]
     static final int ROOT_ENTRY_LENGTH = 32; // [bytes]
     static final byte DESCRIPTOR = (byte) 0; // usual: F6 HEX
 
     private TextArea textArea;
 
+    private Disk disk;
+    private String fileName;
+
     public static void main(String[] args)
     {
         Console c = new Console();
+        // c.newDisk(10);
+        c.newDisk(10);
+        for (int i = 0; i < 10; i++)
+        {
+            c.disk.disk[i] = new byte[Disk.BLOCK_SIZE];
+        }
+        c.disk.disk[0][0] = 97;
+        c.disk.disk[2][6] = 98;
+        c.disk.disk[3][7] = 99;
+        c.shutdown();
+
+        try
+        {
+            c.load();
+        } catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        if (c.disk.disk[0][0] == 97)
+        {
+            System.out.println("V");
+        }
+        if (c.disk.disk[2][6] == 98)
+        {
+            System.out.println("V");
+        }
+        if (c.disk.disk[3][7] == 99)
+        {
+            System.out.println("V");
+        }
+        // c.help();
         c.copyright();
         c.printConsole();
 
@@ -103,31 +146,85 @@ public class Console extends Frame implements FileSystem
 
     // ====================COMMANDS========================//]
 
-    // creaza un nou disk si un nou sistem de fisiere pe acesta
-    void newDisk()
+    // Create a new disk and a file system on it
+    void newDisk(int size)
     {
+        disk = new Disk(size);
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Specify a file to save");
+        int userSelection = fileChooser.showSaveDialog(this);
+
+        if (userSelection == JFileChooser.APPROVE_OPTION)
+        {
+            File fileToSave = fileChooser.getSelectedFile();
+            fileName = fileToSave.getAbsolutePath();
+        }
     }
 
-    // incarca un disk existent de pe HDD; trebuie folosit un obiect de tip
-    // FileDialog
-    void load()
+    // Load an existing disk from HDD; a FileDialog object must be used
+    void load() throws IOException
     {
+        FileDialog fd = new FileDialog(this, "Choose a file", FileDialog.LOAD);
+        FileInputStream fileInputStream = null;
+        fd.setVisible(true);
+        fileName = fd.getDirectory() + fd.getFile();
+        File file = new File(fileName);
+        byte[] byteArray = new byte[(int) file.length()];
+
+        try
+        {
+            fileInputStream = new FileInputStream(file.getPath());
+            fileInputStream.read(byteArray);
+            fileInputStream.close();
+            int size = byteArray.length / Disk.BLOCK_SIZE;
+            disk = new Disk(size);
+            for (int i = 0; i < size; i++)
+            {
+                disk.disk[i] = new byte[Disk.BLOCK_SIZE];
+                for (int j = 0; j < Disk.BLOCK_SIZE - 1; j++)
+                {
+                    disk.disk[i][j] = byteArray[i * Disk.BLOCK_SIZE + j];
+                }
+            }
+
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
     }
 
-    // formateaza un disk
+    // Format a disk
     @Override
     public void format(DiskInterface disk)
     {
+
     }
 
-    // inchide sistemul de fisiere
+    // Close file system
     @Override
     public void shutdown()
     {
+        try
+        {
+            if (disk != null)
+            {
+                FileOutputStream fos = new FileOutputStream(fileName);
+                for (int i = 0; i < disk.getSize(); i++)
+                {
+                    fos.write(disk.disk[i]);
+                }
+                fos.close();
+            }
+        } catch (Exception e)
+        {
+
+        }
+
     }
 
     /*
-     * salveaza diskul pe HDD (primii 4 octeteti vor contine semnatura de disk (la alegere) (aceasta
+     * salveaza diskul pe HDD (primii 4 octeti vor contine semnatura de disk (la alegere) (aceasta
      * semnatura trebuie verifica la incarcare), urmatorii 2 octeti vor contine data salvarii,
      * urmatorii 2 octeti vor contine timpul salvarii, urmatorii 4 octeti vor contine numarul de
      * intrari din ROOT folosite, urmatorii 4 octeti vor contine dimensiunea diskului (numarul de
@@ -137,17 +234,17 @@ public class Console extends Frame implements FileSystem
     {
     }
 
-    // creaza si deschide fisierul cu numele specificat
+    // Create and open the file with specified name
     void mkfile(String name)
     {
     }
 
-    // copiaza frompath la topath
+    // Copy from file path to specified path
     void copy(String frompath, String topath) throws FileNotFoundException
     {
     }
 
-    // deschide fisierul name in modul mode
+    // Open the file in mode 'mode'
     void openFile(String name, int mode)
     {
     }
@@ -176,12 +273,12 @@ public class Console extends Frame implements FileSystem
     {
     }
 
-    // inchide fisierul cu calea path
+    // Close the file with specified path
     void close(String path)
     {
     }
 
-    // inchide toate fisierele deschise
+    // Close all open file
     void closeAll()
     {
     }
@@ -221,6 +318,34 @@ public class Console extends Frame implements FileSystem
     // afiseaza lista comenzilor
     void help()
     {
+        String help = "new <size> <filename>(create a new system)\nload (load an existing system)\n"
+                + "format (format the disk)\nsave (save the disk on HDD)\n"
+                + "shutdown (close the system)\nmkdir (create a new directory)\n"
+                + "mkfile (create and open a file)\ncopy (copy a file/directory"
+                + " to a specified path)\ndelete (delete a file or directory)\n"
+                + "move (move a file/directory to a specified path)\n"
+                + "rename (change the name of a file/directory)\ncd / chdir"
+                + " (change current directory)\nup (move to an upper directory)\n"
+                + "ls (display the content of current directory; option -a display hidden \n"
+                + "files/directories, option -l display in long format ([attribute name <DIR>\n"
+                + "dimension date time], <DIR> is only for directories, date and time refers to\n"
+                + "the moment when directory was created or modified(after first modification)),\n"
+                + "-al (long format, display hidden files/directories))\n"
+                + "attr (display and allow to set files/directories attributes:"
+                + " Read-Only, Hidden, Ecnrypted)\nencrypt (encrypt a file)\n"
+                + "decrypt (decrypt an encrypted file)\nopen(open a file)\n"
+                + "edit (edit a file that is opened in Read-Write mode)\n"
+                + "view(display the contains of a file opened in Read-Only mode)\n"
+                + "close x(close the file with path x)\nclose(close all opened files)\n"
+                + "df(display the dimension of free space)\ndate(display system date)\n"
+                + "time (display sistem time)\ninfo(display informations about disk)\n"
+                + "help / h (display the list of all posible commands with a short description for each command)\n"
+                + "label (display disk label)\nchlabel (change disk label)\n"
+                + "clean (clean all data from bloks that are deleted in FAT)\n"
+                + "exec (lounch in execution a file from HDD)\nsave x (save the file with name or path x on HDD)\n"
+                + "lf (load a file from HDD on virtual disk)\n";
+        System.out.println(help);
+        textArea.append(help);
     }
 
     /*
